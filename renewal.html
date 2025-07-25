@@ -1,0 +1,814 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Insurance Renewal Journey - CRM Insights (Final Corrected)</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            line-height: 1.6;
+            color: #2d3748;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 30px;
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #1a202c;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            color: #4a5568;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .correction-badge {
+            background: linear-gradient(135deg, #e53e3e, #c53030);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            display: inline-block;
+            margin-bottom: 15px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+
+        .metric-card {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .metric-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+        }
+
+        .metric-number {
+            font-size: 2.2rem;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+
+        .metric-label {
+            color: #718096;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 8px;
+        }
+
+        .metric-sub {
+            font-size: 0.9rem;
+            color: #4a5568;
+            font-weight: 500;
+        }
+
+        .insight-section {
+            background: rgba(255, 255, 255, 0.95);
+            margin-bottom: 30px;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+        }
+
+        .section-header {
+            background: linear-gradient(135deg, #4299e1, #3182ce);
+            color: white;
+            padding: 20px;
+            position: relative;
+        }
+
+        .section-header::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #ffd700, #ff6b35);
+        }
+
+        .section-header h2 {
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+
+        .section-content {
+            padding: 25px;
+        }
+
+        .ranking-list {
+            list-style: none;
+        }
+
+        .ranking-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 15px;
+            margin-bottom: 10px;
+            background: #f7fafc;
+            border-radius: 10px;
+            border-left: 4px solid #4299e1;
+            transition: all 0.3s ease;
+        }
+
+        .ranking-item:hover {
+            background: #edf2f7;
+            transform: translateX(5px);
+        }
+
+        .ranking-item.top-performer {
+            border-left-color: #38a169;
+            background: linear-gradient(135deg, #f0fff4, #c6f6d5);
+        }
+
+        .ranking-item.poor-performer {
+            border-left-color: #e53e3e;
+            background: linear-gradient(135deg, #fff5f5, #fed7d7);
+        }
+
+        .ranking-item.emerging {
+            border-left-color: #d69e2e;
+            background: linear-gradient(135deg, #fffbf0, #faf089);
+        }
+
+        .rank-number {
+            font-weight: 700;
+            font-size: 1.2rem;
+            color: #4299e1;
+            min-width: 30px;
+        }
+
+        .rank-details {
+            flex: 1;
+            margin-left: 15px;
+        }
+
+        .rank-name {
+            font-weight: 600;
+            font-size: 1rem;
+        }
+
+        .rank-stats {
+            font-size: 0.85rem;
+            color: #718096;
+        }
+
+        .volume-indicator {
+            font-size: 0.75rem;
+            background: #e2e8f0;
+            padding: 2px 8px;
+            border-radius: 12px;
+            margin-top: 4px;
+            display: inline-block;
+        }
+
+        .volume-high { background: #fed7d7; color: #742a2a; }
+        .volume-medium { background: #fef2c0; color: #744210; }
+        .volume-low { background: #e2e8f0; color: #4a5568; }
+
+        .conversion-rate {
+            font-weight: 700;
+            font-size: 1.1rem;
+            padding: 5px 12px;
+            border-radius: 20px;
+            background: #e2e8f0;
+            color: #2d3748;
+        }
+
+        .rate-high { background: #c6f6d5; color: #22543d; }
+        .rate-medium { background: #fef2c0; color: #744210; }
+        .rate-low { background: #fed7d7; color: #742a2a; }
+
+        .chart-container {
+            position: relative;
+            height: 400px;
+            margin: 20px 0;
+        }
+
+        .key-insights {
+            background: linear-gradient(135deg, #ffeaa7, #fab1a0);
+            border-radius: 15px;
+            padding: 25px;
+            margin: 30px 0;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .key-insights h3 {
+            color: #2d3748;
+            margin-bottom: 15px;
+            font-size: 1.3rem;
+        }
+
+        .insight-list {
+            list-style: none;
+        }
+
+        .insight-item {
+            background: rgba(255, 255, 255, 0.8);
+            padding: 12px 15px;
+            margin-bottom: 10px;
+            border-radius: 8px;
+            border-left: 4px solid #e17055;
+        }
+
+        .insight-item strong {
+            color: #2d3748;
+        }
+
+        .action-items {
+            background: linear-gradient(135deg, #a8e6cf, #7fcdcd);
+            border-radius: 15px;
+            padding: 25px;
+            margin: 30px 0;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .action-items h3 {
+            color: #2d3748;
+            margin-bottom: 15px;
+            font-size: 1.3rem;
+        }
+
+        .critical-alert {
+            background: linear-gradient(135deg, #ff9a9e, #fecfef);
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            border-left: 5px solid #e53e3e;
+        }
+
+        .critical-alert h4 {
+            color: #742a2a;
+            margin-bottom: 10px;
+        }
+
+        .opportunity-box {
+            background: linear-gradient(135deg, #a8e6cf, #7fcdcd);
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            border-left: 5px solid #38a169;
+        }
+
+        .opportunity-box h4 {
+            color: #22543d;
+            margin-bottom: 10px;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .metrics-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .ranking-item {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .conversion-rate {
+                margin-top: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="correction-badge">🔄 Final Corrected Analysis</div>
+            <h1>🚗 Insurance Renewal Journey Analysis</h1>
+            <p>Strategic insights for CRM optimization - Understanding visit patterns vs user behavior</p>
+        </div>
+
+        <!-- Overall Metrics -->
+        <div class="metrics-grid">
+            <div class="metric-card">
+                <div class="metric-label">Total Users</div>
+                <div class="metric-number" style="color: #4299e1;">255</div>
+                <div class="metric-sub">Actual unique customers</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-label">Total Visits</div>
+                <div class="metric-number" style="color: #805ad5;">1,298</div>
+                <div class="metric-sub">Avg 5.1 visits per user</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-label">Converting Visits</div>
+                <div class="metric-number" style="color: #38a169;">200</div>
+                <div class="metric-sub">Successful renewal visits</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-label">Visit Conversion Rate</div>
+                <div class="metric-number" style="color: #e53e3e;">15.41%</div>
+                <div class="metric-sub">Visits that led to renewal</div>
+            </div>
+        </div>
+
+        <!-- Key Insights Alert -->
+        <div class="key-insights">
+            <h3>🎯 Critical Insights from Complete Analysis (Including Direct)</h3>
+            <ul class="insight-list">
+                <li class="insight-item">
+                    <strong>Multi-Visit Journey:</strong> Users average 5.1 visits before deciding - renewal is a considered purchase
+                </li>
+                <li class="insight-item">
+                    <strong>Hidden Gem - Direct Traffic:</strong> 27.27% conversion rate with 10.2% of traffic (132 visits) - third best performer!
+                </li>
+                <li class="insight-item">
+                    <strong>Best Performing Sources:</strong> DFN (50%), Email (29.27%), and Direct (27.27%) lead in efficiency
+                </li>
+                <li class="insight-item">
+                    <strong>Volume vs Performance Gap:</strong> LINE drives 62.8% of visits but only 11.29% conversion
+                </li>
+                <li class="insight-item">
+                    <strong>Emerging Channel:</strong> SMS shows strong performance (18.18% conversion, 77 visits)
+                </li>
+                <li class="insight-item">
+                    <strong>User Behavior:</strong> Multiple touchpoints needed - optimize for journey, not single conversion
+                </li>
+            </ul>
+        </div>
+
+        <!-- UTM Source Analysis -->
+        <div class="insight-section">
+            <div class="section-header">
+                <h2>📊 UTM Source Performance Ranking</h2>
+            </div>
+            <div class="section-content">
+                <ul class="ranking-list">
+                    <li class="ranking-item top-performer">
+                        <span class="rank-number">1</span>
+                        <div class="rank-details">
+                            <div class="rank-name">DFN</div>
+                            <div class="rank-stats">2 converting visits from 4 total visits</div>
+                            <div class="volume-indicator volume-low">Very Low Volume</div>
+                        </div>
+                        <span class="conversion-rate rate-high">50.00%</span>
+                    </li>
+                    <li class="ranking-item top-performer">
+                        <span class="rank-number">2</span>
+                        <div class="rank-details">
+                            <div class="rank-name">Email</div>
+                            <div class="rank-stats">12 converting visits from 41 total visits</div>
+                            <div class="volume-indicator volume-medium">Good Volume</div>
+                        </div>
+                        <span class="conversion-rate rate-high">29.27%</span>
+                    </li>
+                    <li class="ranking-item top-performer">
+                        <span class="rank-number">3</span>
+                        <div class="rank-details">
+                            <div class="rank-name">Facebook</div>
+                            <div class="rank-stats">6 converting visits from 25 total visits</div>
+                            <div class="volume-indicator volume-medium">Moderate Volume</div>
+                        </div>
+                        <span class="conversion-rate rate-high">24.00%</span>
+                    </li>
+                    <li class="ranking-item emerging">
+                        <span class="rank-number">4</span>
+                        <div class="rank-details">
+                            <div class="rank-name">Google</div>
+                            <div class="rank-stats">38 converting visits from 201 total visits</div>
+                            <div class="volume-indicator volume-medium">High Volume</div>
+                        </div>
+                        <span class="conversion-rate rate-medium">18.91%</span>
+                    </li>
+                    <li class="ranking-item emerging">
+                        <span class="rank-number">5</span>
+                        <div class="rank-details">
+                            <div class="rank-name">SMS</div>
+                            <div class="rank-stats">14 converting visits from 77 total visits</div>
+                            <div class="volume-indicator volume-medium">Growing Channel</div>
+                        </div>
+                        <span class="conversion-rate rate-medium">18.18%</span>
+                    </li>
+                    <li class="ranking-item poor-performer">
+                        <span class="rank-number">6</span>
+                        <div class="rank-details">
+                            <div class="rank-name">LINE</div>
+                            <div class="rank-stats">92 converting visits from 815 total visits</div>
+                            <div class="volume-indicator volume-high">MASSIVE VOLUME (62.8%)</div>
+                        </div>
+                        <span class="conversion-rate rate-low">11.29%</span>
+                    </li>
+                    <li class="ranking-item poor-performer">
+                        <span class="rank-number">7</span>
+                        <div class="rank-details">
+                            <div class="rank-name">Site</div>
+                            <div class="rank-stats">0 converting visits from 3 total visits</div>
+                            <div class="volume-indicator volume-low">Minimal Volume</div>
+                        </div>
+                        <span class="conversion-rate rate-low">0.00%</span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- UTM Medium Analysis -->
+        <div class="insight-section">
+            <div class="section-header">
+                <h2>🎯 UTM Medium Performance Analysis</h2>
+            </div>
+            <div class="section-content">
+                <ul class="ranking-list">
+                    <li class="ranking-item top-performer">
+                        <span class="rank-number">1</span>
+                        <div class="rank-details">
+                            <div class="rank-name">Popup</div>
+                            <div class="rank-stats">1 converting visit from 2 total visits</div>
+                        </div>
+                        <span class="conversion-rate rate-high">50.00%</span>
+                    </li>
+                    <li class="ranking-item top-performer">
+                        <span class="rank-number">2</span>
+                        <div class="rank-details">
+                            <div class="rank-name">Paid Social</div>
+                            <div class="rank-stats">1 converting visit from 3 total visits</div>
+                        </div>
+                        <span class="conversion-rate rate-high">33.33%</span>
+                    </li>
+                    <li class="ranking-item top-performer">
+                        <span class="rank-number">3</span>
+                        <div class="rank-details">
+                            <div class="rank-name">Email Marketing</div>
+                            <div class="rank-stats">7 converting visits from 25 total visits</div>
+                        </div>
+                        <span class="conversion-rate rate-high">28.00%</span>
+                    </li>
+                    <li class="ranking-item emerging">
+                        <span class="rank-number">4</span>
+                        <div class="rank-details">
+                            <div class="rank-name">Paid PMax</div>
+                            <div class="rank-stats">3 converting visits from 12 total visits</div>
+                        </div>
+                        <span class="conversion-rate rate-medium">25.00%</span>
+                    </li>
+                    <li class="ranking-item emerging">
+                        <span class="rank-number">5</span>
+                        <div class="rank-details">
+                            <div class="rank-name">Paid SEM</div>
+                            <div class="rank-stats">17 converting visits from 97 total visits</div>
+                        </div>
+                        <span class="conversion-rate rate-medium">17.53%</span>
+                    </li>
+                    <li class="ranking-item poor-performer">
+                        <span class="rank-number">6</span>
+                        <div class="rank-details">
+                            <div class="rank-name">LINE Push</div>
+                            <div class="rank-stats">45 converting visits from 362 total visits</div>
+                            <div class="volume-indicator volume-high">HIGHEST VOLUME MEDIUM</div>
+                        </div>
+                        <span class="conversion-rate rate-low">12.43%</span>
+                    </li>
+                    <li class="ranking-item poor-performer">
+                        <span class="rank-number">7</span>
+                        <div class="rank-details">
+                            <div class="rank-name">Organic LINE Menu</div>
+                            <div class="rank-stats">2 converting visits from 27 total visits</div>
+                        </div>
+                        <span class="conversion-rate rate-low">7.41%</span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Critical Issues and Opportunities -->
+        <div class="critical-alert">
+            <h4>🚨 Critical Issue: LINE Channel Underperformance</h4>
+            <p><strong>Problem:</strong> LINE drives 815 visits (62.8% of total traffic) but only achieves 11.29% conversion rate</p>
+            <p><strong>Impact:</strong> If LINE performed at email levels (29.27%), we'd see 238 conversions instead of 92 - a potential 146 additional renewals!</p>
+            <p><strong>Immediate Action Required:</strong> LINE message optimization, timing analysis, and user experience review</p>
+        </div>
+
+        <div class="opportunity-box">
+            <h4>🎯 Major Opportunities Identified</h4>
+            <p><strong>1. Direct Traffic Excellence:</strong> 27.27% conversion rate with 132 visits (10.2% of traffic) - investigate what drives direct visits</p>
+            <p><strong>2. Multi-Visit Journey:</strong> Users make 5.1 visits on average - implement progressive nurturing across touchpoints</p>
+            <ul style="margin-top: 10px; margin-left: 20px;">
+                <li>Visit 1-2: Education and awareness</li>
+                <li>Visit 3-4: Comparison and benefits  </li>
+                <li>Visit 5+: Urgency and incentives</li>
+            </ul>
+            <p style="margin-top: 10px;"><strong>3. Brand Recognition:</strong> Strong direct traffic suggests good brand awareness - leverage this in other channels</p>
+        </div>
+
+        <!-- Chart Section -->
+        <div class="insight-section">
+            <div class="section-header">
+                <h2>📈 Volume vs Performance Analysis</h2>
+            </div>
+            <div class="section-content">
+                <div class="chart-container">
+                    <canvas id="volumePerformanceChart"></canvas>
+                </div>
+                <p style="margin-top: 15px; color: #4a5568; font-size: 0.9rem;">
+                    <strong>Chart Insight:</strong> The ideal position is top-right (high volume + high conversion). 
+                    LINE represents the biggest optimization opportunity with massive volume but low conversion.
+                </p>
+            </div>
+        </div>
+
+        <!-- User Journey Analysis -->
+        <div class="insight-section">
+            <div class="section-header">
+                <h2>🔄 Multi-Visit Journey Insights</h2>
+            </div>
+            <div class="section-content">
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px;">
+                    <div style="background: #e6fffa; padding: 20px; border-radius: 10px; border-left: 4px solid #38a169;">
+                        <h5 style="color: #22543d; margin-bottom: 10px;">👥 User Behavior</h5>
+                        <p><strong>255 users</strong> generated <strong>1,298 visits</strong></p>
+                        <p>Average: <strong>5.1 visits per user</strong></p>
+                        <p style="font-size: 0.85rem; margin-top: 8px; color: #22543d;">Renewal requires multiple touchpoints</p>
+                    </div>
+                    <div style="background: #fff5f5; padding: 20px; border-radius: 10px; border-left: 4px solid #e53e3e;">
+                        <h5 style="color: #742a2a; margin-bottom: 10px;">📊 Conversion Pattern</h5>
+                        <p><strong>200 visits</strong> resulted in renewals</p>
+                        <p>From: <strong>579 journey types</strong></p>
+                        <p style="font-size: 0.85rem; margin-top: 8px; color: #742a2a;">15.41% visit conversion rate</p>
+                    </div>
+                    <div style="background: #fffbf0; padding: 20px; border-radius: 10px; border-left: 4px solid #d69e2e;">
+                        <h5 style="color: #744210; margin-bottom: 10px;">🎯 Optimization Focus</h5>
+                        <p>Target: <strong>Journey-based nurturing</strong></p>
+                        <p>Not: <strong>Single-visit conversion</strong></p>
+                        <p style="font-size: 0.85rem; margin-top: 8px; color: #744210;">Progressive engagement strategy</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Action Items -->
+        <div class="action-items">
+            <h3>🚀 Priority CRM Actions (Based on Corrected Analysis)</h3>
+            <ul class="insight-list">
+                <li class="insight-item">
+                    <strong>URGENT - LINE Optimization:</strong> 815 visits with 11.29% conversion - biggest opportunity. Analyze message content, timing, and user experience
+                </li>
+                <li class="insight-item">
+                    <strong>Investigate Direct Traffic Success:</strong> 27.27% conversion rate - understand what drives direct visits and replicate across channels
+                </li>
+                <li class="insight-item">
+                    <strong>Scale Email Success:</strong> 29.27% conversion rate with good volume - increase email frequency and budget allocation
+                </li>
+                <li class="insight-item">
+                    <strong>Develop SMS Channel:</strong> 18.18% conversion emerging - test SMS campaigns and scale successful formats
+                </li>
+                <li class="insight-item">
+                    <strong>Multi-Visit Journey Mapping:</strong> Design progressive nurturing for 5+ visit journey rather than single-conversion focus
+                </li>
+                <li class="insight-item">
+                    <strong>Google SEM Enhancement:</strong> 201 visits, 18.91% conversion - solid baseline to improve with better targeting
+                </li>
+                <li class="insight-item">
+                    <strong>Test High-Performing Tactics:</strong> Popup (50%) and Paid Social (33.33%) need volume testing
+                </li>
+            </ul>
+        </div>
+
+        <!-- ROI Impact Analysis -->
+        <div class="insight-section">
+            <div class="section-header">
+                <h2>💰 ROI Impact Scenarios</h2>
+            </div>
+            <div class="section-content">
+                <h4>Potential Revenue Impact from LINE Optimization</h4>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; margin-top: 20px;">
+                    <div style="background: #fff5f5; padding: 20px; border-radius: 10px; border-left: 4px solid #e53e3e;">
+                        <h5 style="color: #742a2a; margin-bottom: 10px;">📉 Current State</h5>
+                        <p><strong>815 LINE visits</strong></p>
+                        <p><strong>92 conversions (11.29%)</strong></p>
+                        <p><strong>Baseline Performance</strong></p>
+                    </div>
+                    <div style="background: #fef2c0; padding: 20px; border-radius: 10px; border-left: 4px solid #d69e2e;">
+                        <h5 style="color: #744210; margin-bottom: 10px;">🎯 Conservative Target</h5>
+                        <p><strong>815 LINE visits</strong></p>
+                        <p><strong>146 conversions (18%)</strong></p>
+                        <p><strong>+54 additional renewals</strong></p>
+                    </div>
+                    <div style="background: #e6fffa; padding: 20px; border-radius: 10px; border-left: 4px solid #38a169;">
+                        <h5 style="color: #22543d; margin-bottom: 10px;">🚀 Optimistic Target</h5>
+                        <p><strong>815 LINE visits</strong></p>
+                        <p><strong>238 conversions (29.27%)</strong></p>
+                        <p><strong>+146 additional renewals</strong></p>
+                    </div>
+                </div>
+                <div style="background: #f0fff4; padding: 15px; border-radius: 8px; margin-top: 20px; border: 1px solid #38a169;">
+                    <p style="color: #22543d;"><strong>Business Impact:</strong> Achieving email-level performance on LINE traffic could increase total renewals by 73% (from 200 to 346)</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Implementation Roadmap -->
+        <div class="insight-section">
+            <div class="section-header">
+                <h2>🗺️ 90-Day Implementation Roadmap</h2>
+            </div>
+            <div class="section-content">
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;">
+                    <div style="background: #e2e8f0; padding: 20px; border-radius: 10px;">
+                        <h5 style="color: #2d3748; margin-bottom: 15px;">🏃‍♂️ Week 1-2: Quick Wins</h5>
+                        <ul style="margin-left: 20px; color: #4a5568;">
+                            <li>Audit LINE message content and timing</li>
+                            <li>A/B test email subject lines and frequency</li>
+                            <li>Implement SMS campaign testing</li>
+                        </ul>
+                    </div>
+                    <div style="background: #fef2c0; padding: 20px; border-radius: 10px;">
+                        <h5 style="color: #744210; margin-bottom: 15px;">🔧 Week 3-8: Optimization</h5>
+                        <ul style="margin-left: 20px; color: #744210;">
+                            <li>Redesign LINE user journey and messaging</li>
+                            <li>Implement multi-visit nurturing sequences</li>
+                            <li>Scale successful popup and social tactics</li>
+                        </ul>
+                    </div>
+                    <div style="background: #e6fffa; padding: 20px; border-radius: 10px;">
+                        <h5 style="color: #22543d; margin-bottom: 15px;">📊 Week 9-12: Scale & Measure</h5>
+                        <ul style="margin-left: 20px; color: #22543d;">
+                            <li>Roll out optimized campaigns</li>
+                            <li>Monitor conversion improvements</li>
+                            <li>Plan next phase based on results</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Create Volume vs Performance Scatter Chart
+        const ctx = document.getElementById('volumePerformanceChart').getContext('2d');
+        
+        const volumePerformanceChart = new Chart(ctx, {
+            type: 'scatter',
+            data: {
+                datasets: [{
+                    label: 'UTM Sources',
+                    data: [
+                        { x: 4, y: 50.00, label: 'DFN' },
+                        { x: 41, y: 29.27, label: 'Email' },
+                        { x: 132, y: 27.27, label: 'Direct' },
+                        { x: 25, y: 24.00, label: 'Facebook' },
+                        { x: 201, y: 18.91, label: 'Google' },
+                        { x: 77, y: 18.18, label: 'SMS' },
+                        { x: 815, y: 11.29, label: 'LINE' },
+                        { x: 3, y: 0.00, label: 'Site' }
+                    ],
+                    backgroundColor: [
+                        '#38a169', '#38a169', '#d69e2e', '#4299e1', '#d69e2e', '#e53e3e', '#718096'
+                    ],
+                    borderColor: [
+                        '#2f855a', '#2f855a', '#b7791f', '#3182ce', '#b7791f', '#c53030', '#4a5568'
+                    ],
+                    borderWidth: 2,
+                    pointRadius: function(context) {
+                        const value = context.parsed.x;
+                        return value > 500 ? 15 : value > 100 ? 12 : value > 20 ? 8 : 6;
+                    }
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    title: {
+                        display: true,
+                        text: 'Volume vs Performance: Finding the Sweet Spot',
+                        font: { size: 16, weight: 'bold' }
+                    },
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                const point = context.raw;
+                                return `${point.label}: ${context.parsed.y}% conversion, ${context.parsed.x} visits`;
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        title: {
+                            display: true,
+                            text: 'Total Visits (Volume)'
+                        },
+                        type: 'logarithmic',
+                        min: 1,
+                        max: 1000
+                    },
+                    y: {
+                        title: {
+                            display: true,
+                            text: 'Conversion Rate (%)'
+                        },
+                        beginAtZero: true,
+                        max: 60
+                    }
+                },
+                onHover: (event, activeElements) => {
+                    event.native.target.style.cursor = activeElements.length > 0 ? 'pointer' : 'default';
+                }
+            }
+        });
+
+        // Add data labels
+        Chart.register({
+            id: 'dataLabels',
+            afterDatasetsDraw: function(chart) {
+                const ctx = chart.ctx;
+                chart.data.datasets.forEach((dataset, i) => {
+                    const meta = chart.getDatasetMeta(i);
+                    meta.data.forEach((element, index) => {
+                        const data = dataset.data[index];
+                        const position = element.getProps(['x', 'y'], true);
+                        
+                        ctx.fillStyle = '#2d3748';
+                        ctx.font = 'bold 11px Inter';
+                        ctx.textAlign = 'center';
+                        ctx.fillText(data.label, position.x, position.y - 15);
+                    });
+                });
+            }
+        });
+
+        // Add smooth scrolling animation
+        document.addEventListener('DOMContentLoaded', function() {
+            const sections = document.querySelectorAll('.insight-section, .key-insights, .action-items');
+            
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.style.opacity = '1';
+                        entry.target.style.transform = 'translateY(0)';
+                    }
+                });
+            }, { threshold: 0.1 });
+
+            sections.forEach(section => {
+                section.style.opacity = '0';
+                section.style.transform = 'translateY(20px)';
+                section.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+                observer.observe(section);
+            });
+        });
+
+        // Add interactive hover effects
+        document.querySelectorAll('.ranking-item').forEach(item => {
+            item.addEventListener('mouseenter', function() {
+                this.style.transform = 'translateX(10px)';
+                this.style.boxShadow = '0 5px 15px rgba(0,0,0,0.1)';
+            });
+            
+            item.addEventListener('mouseleave', function() {
+                this.style.transform = 'translateX(5px)';
+                this.style.boxShadow = 'none';
+            });
+        });
+    </script>
+</body>
+</html>
